@@ -1,43 +1,61 @@
-﻿namespace LDAVariationalBayes
+﻿namespace LdaGenerator
 
 open System
+open System.Diagnostics
 open MathNet.Numerics.Distributions
 
-type Word = {
-    z: int
-    w: int
+type Alpha = float array
+type Beta = float array
+type Theta = float array
+type ThetaDist = Dirichlet
+type Phi = float array
+type PhiDist = Dirichlet
+type Z = int
+type ZDist = Multinomial
+type WDist = Multinomial
+type Word = int
+type Doc = Word list
+type HiddenVar = {
+    thetas: Theta array
+    phis: Phi array
+    zs: int array array
 }
-
-type Document = {
-    theta: float array
-    d: Word seq
-}
-
-type Topic = float array
 
 type LdaGenerator() =
+    
+    let log =
+        let log = TraceSource("LdaGenerator")
+        use consoleListener = new ConsoleTraceListener()
+        log.Listeners.Add(consoleListener) |> ignore
+        log.Switch.Level <- SourceLevels.Information
+        log
 
     let findOneIndex (a: int array): int =
-        Array.zip a [| 0 .. a.Length - 1 |]
-        |> Array.find (fun (e, i) -> e = 1)
-        |> snd
+        Array.indexed a
+        |> Array.find (fun (i, e) -> e = 1)
+        |> fst
 
-    member this.Generate(alpha: float array, beta: float array, numOfDocs: int, numOfWords: int -> int, numOfTopics: int): (Document seq * Topic array) =
-        let topicDirichlet = Dirichlet(beta)
-        let topics: Topic array = [| for k in [ 0 .. numOfTopics ] -> topicDirichlet.Sample() |]
-        let phis: Multinomial array = [| for topic in topics -> Multinomial(topic, 1) |]
-        let documentDirichlet = Dirichlet(alpha)
-        let documents = seq {
-            for d in [ 0 .. numOfDocs - 1 ] do
-                let theta: float array = documentDirichlet.Sample()
-                let mult = Multinomial(theta, 1)
-                let d = seq {
-                    for w in [ 0 .. numOfWords d - 1 ] do
-                        let z = findOneIndex (mult.Sample())
-                        let phi = phis.[z]
-                        let w = findOneIndex (phi.Sample())
-                        yield { z = z; w = w }
-                }
-                yield { theta = theta; d = d }
-        }
-        (documents, topics)
+    member this.Generate(alpha: Alpha, beta: Beta, numOfDocs: int, numOfWords: int -> int): (Doc array * HiddenVar) =
+        let numOfTopics = alpha.Length
+        log.TraceInformation("Generating Phi"); log.Flush()
+        let phiDist: PhiDist = Dirichlet(beta)
+        let phis: Phi array = Array.init numOfTopics (fun _ -> phiDist.Sample())
+        let wDists: WDist array = [| for phi in phis -> Multinomial(phi, 1) |]
+        log.TraceInformation("Generating Theta"); log.Flush()
+        let thetaDist: ThetaDist = Dirichlet(alpha)
+        let thetas: Theta array = Array.init numOfDocs (fun _ -> thetaDist.Sample())
+        log.TraceInformation("Generating Z"); log.Flush()
+        let zDists: ZDist array = [| for theta in thetas -> Multinomial(theta, 1) |]
+        let zs: int array array = Array.init numOfDocs (fun d -> Array.create (numOfWords d) 0)
+        let docs: Doc array =
+            [|
+                for d in [ 0 .. numOfDocs - 1 ] do
+                    let zDist = zDists.[d]
+                    yield [
+                        for w in [ 0 .. numOfWords d - 1 ] do
+                            let z = findOneIndex (zDist.Sample())
+                            let wDist = wDists.[z]
+                            yield findOneIndex (wDist.Sample())
+                    ]
+            |]
+        (docs, { thetas = thetas; phis = phis; zs = zs })

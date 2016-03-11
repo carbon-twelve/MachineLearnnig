@@ -1,3 +1,5 @@
 packages/
 KMeans/Samples/
 KMeans/obj/
+LDAVariationalBayes/bin/
+LDAVariationalBayes/obj/
