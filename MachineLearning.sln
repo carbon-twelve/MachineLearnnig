@@ -15,6 +15,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Backpropagation", "Backprop
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "LDAVariationalBayes", "LDAVariationalBayes\LDAVariationalBayes.fsproj", "{BD97551C-353C-4625-844C-98CD52021CB0}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "LDAVariationalBayes.Test", "LDAVariationalBayes.Test\LDAVariationalBayes.Test.fsproj", "{EFC68276-3316-4738-8096-0068C69B9104}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{BD97551C-353C-4625-844C-98CD52021CB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD97551C-353C-4625-844C-98CD52021CB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BD97551C-353C-4625-844C-98CD52021CB0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EFC68276-3316-4738-8096-0068C69B9104}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EFC68276-3316-4738-8096-0068C69B9104}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EFC68276-3316-4738-8096-0068C69B9104}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EFC68276-3316-4738-8096-0068C69B9104}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
